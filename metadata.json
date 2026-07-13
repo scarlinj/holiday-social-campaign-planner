@@ -1,0 +1,8 @@
+{
+  "name": "Holiday Social Campaign Planner",
+  "description": "An interactive campaign planner and AI content generator for social media managers to design and launch holiday-themed marketing campaigns.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
