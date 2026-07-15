@@ -3,6 +3,8 @@
 
 An interactive campaign planner and AI content generator designed for social media managers to design, schedule, and preview holiday-themed marketing campaigns. Built with a high-fidelity **Cosmic Slate Theme** that transitions smoothly between responsive **Light and Dark Modes**.
 
+[Home screen image](./assets/screenshots/Homepage.png)
+
 ---
 
 ## 🎨 Application Views & Core Layout
@@ -32,6 +34,8 @@ Once assets are assembled, the workspace opens into four modular interactive tab
 *   **📅 Interactive Campaign Calendar**:
     *   A full grid-view monthly calendar highlighting the campaign launch date and individual task slots.
     *   Supports dynamic rescheduling via **drag-and-drop** and custom date shifting.
+
+[Valentine's Day Campaign](./assets/screenshots/Valentine's%20Day%20Example.png)
 
 ---
 
@@ -63,10 +67,14 @@ The **Assemble Campaign Assets** feature is the core intelligence of the applica
 2.  **Input Brand Identity**: Define your brand name, product, audience, and preferred tone of voice.
 3.  **Specify Campaign Objectives (Optional)**: Provide custom campaign hooks (e.g. *"20% discount code: COFFEE20"*, *"Focus on eco-friendly paper cups"*).
 
+[Create a Holiday Campaign](./assets/screenshots/Create%20Holiday%20Campaign.png)
+
 ### Step 2: Triggering Assembly
 *   Click **Assemble Campaign Assets**.
 *   The button transitions into a loading state, cycling through creative planning quotes (*"Sifting through marketing strategies..."*, *"Weaving your custom brand tone..."*, *"Structuring launch milestones..."*) to provide premium user feedback.
 *   The application gathers all parameters and dispatches a JSON payload to the backend route `/api/campaigns/generate`.
+
+[Loading holiday campaign](./assets/screenshots/Planning%20Holiday%20Campaign%20Loading.png)
 
 ### Step 3: Server-side Gemini Reasoning
 1.  The Express backend securely retrieves the `GEMINI_API_KEY` from environment variables.

@@ -75,7 +75,7 @@ app.post("/api/campaigns/generate", async (req: express.Request, res: express.Re
     `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-3.1-flash-lite",
       contents: prompt,
       config: {
         systemInstruction,

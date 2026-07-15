@@ -27,7 +27,9 @@ import {
   Trash2,
   AlertCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Sun,
+  Moon
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { PRESET_HOLIDAYS } from "./data/holidays";
@@ -144,6 +146,21 @@ export default function App() {
   const [calendarYear, setCalendarYear] = useState<number>(() => new Date().getFullYear());
   const [calendarMonth, setCalendarMonth] = useState<number>(() => new Date().getMonth());
   const [draggedOverDay, setDraggedOverDay] = useState<string | null>(null);
+
+  // --- Dark Mode State ---
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    return localStorage.getItem("holiday_campaign_theme") === "dark";
+  });
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("holiday_campaign_theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("holiday_campaign_theme", "light");
+    }
+  }, [darkMode]);
 
   // Synchronize calendar view month with the campaign launch date
   useEffect(() => {
@@ -439,38 +456,38 @@ export default function App() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col">
+    <div className={`min-h-screen ${darkMode ? "dark bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-800"} font-sans flex flex-col transition-colors duration-200`}>
       
       {/* Header */}
-      <header className="bg-white border-b border-slate-200/80 sticky top-0 z-40 px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+      <header className="bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-40 px-6 py-4 flex flex-wrap items-center justify-between gap-4 transition-colors duration-200">
         <div className="flex items-center gap-3">
-          <div className="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-100 flex items-center justify-center">
+          <div className="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-100 dark:shadow-none flex items-center justify-center">
             <Calendar className="w-6 h-6" id="logo_icon" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
               Holiday Social Campaign Planner
             </h1>
-            <p className="text-xs text-slate-500 font-medium">Standalone Workspace & AI Content Suite</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Standalone Workspace & AI Content Suite</p>
           </div>
         </div>
 
         {/* Quick Brand Profiles Selector */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {savedProfiles.length > 0 && (
-            <div className="flex items-center gap-1.5 bg-slate-100 py-1 px-2.5 rounded-lg border border-slate-200/60 text-xs">
-              <span className="text-slate-500 font-medium">Brand Preset:</span>
+            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 py-1 px-2.5 rounded-lg border border-slate-200/60 dark:border-slate-700 text-xs transition-colors duration-200">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Brand Preset:</span>
               <select 
-                className="bg-transparent font-semibold text-slate-700 focus:outline-none cursor-pointer"
+                className="bg-transparent font-semibold text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
                 onChange={(e) => {
                   const prof = savedProfiles.find(p => p.id === e.target.value);
                   if (prof) handleLoadProfile(prof);
                 }}
                 defaultValue=""
               >
-                <option value="" disabled>Select brand profile...</option>
+                <option value="" disabled className="dark:bg-slate-900 dark:text-slate-100">Select brand profile...</option>
                 {savedProfiles.map(p => (
-                  <option key={p.id} value={p.id}>{p.name} ({p.brandName})</option>
+                  <option key={p.id} value={p.id} className="dark:bg-slate-900 dark:text-slate-100">{p.name} ({p.brandName})</option>
                 ))}
               </select>
             </div>
@@ -478,11 +495,21 @@ export default function App() {
           
           <button 
             onClick={() => setShowProfileModal(true)}
-            className="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/50 rounded-lg px-3 py-1.5 text-xs font-semibold transition"
+            className="flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/50 dark:border-indigo-800/40 rounded-lg px-3 py-1.5 text-xs font-semibold transition cursor-pointer"
             id="btn_save_brand_profile"
           >
             <Bookmark className="w-3.5 h-3.5" />
             Save Brand Details
+          </button>
+
+          {/* Theme Toggle Button */}
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="flex items-center justify-center p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/40 dark:border-slate-700/60 transition cursor-pointer"
+            title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            id="theme_switcher_btn"
+          >
+            {darkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
           </button>
         </div>
       </header>
@@ -494,17 +521,17 @@ export default function App() {
         <section className="lg:col-span-5 flex flex-col gap-6">
           
           {/* Section 1: Campaign Target Definition */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm flex flex-col gap-4 transition-colors duration-200">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold">1</span>
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-xs font-bold">1</span>
                 Holiday & Event Setup
               </h2>
             </div>
 
             {/* Custom Input */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-slate-600">Selected Holiday or Custom Name</label>
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Selected Holiday or Custom Name</label>
               <div className="relative">
                 <input 
                   type="text" 
@@ -514,7 +541,7 @@ export default function App() {
                     setSelectedHoliday(""); // Override preset selection
                   }}
                   placeholder="e.g. Earth Day, Winter Clearance, Coffee Fest"
-                  className="w-full pl-3 pr-10 py-2.5 bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none transition"
+                  className="w-full pl-3 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100/30 dark:focus:ring-indigo-950 rounded-xl text-sm font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-colors duration-200"
                   id="input_event_name"
                 />
                 <Sparkles className="w-4 h-4 text-indigo-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -522,9 +549,9 @@ export default function App() {
             </div>
 
             {/* Catalog Search & Selector */}
-            <div className="border border-slate-100 rounded-xl p-3 bg-slate-50/50 flex flex-col gap-3">
+            <div className="border border-slate-100 dark:border-slate-800 rounded-xl p-3 bg-slate-50/50 dark:bg-slate-800/30 flex flex-col gap-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-slate-700">Quick Holiday Catalog</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Quick Holiday Catalog</span>
                 
                 {/* Categories */}
                 <div className="flex gap-1">
@@ -532,10 +559,10 @@ export default function App() {
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase transition ${
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase transition cursor-pointer ${
                         selectedCategory === cat 
-                          ? "bg-slate-800 text-white" 
-                          : "bg-slate-100 hover:bg-slate-200 text-slate-600"
+                          ? "bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900" 
+                          : "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400"
                       }`}
                     >
                       {cat}
@@ -551,7 +578,7 @@ export default function App() {
                   placeholder="Search holidays..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200/80 rounded-lg text-xs placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
               </div>
@@ -567,36 +594,36 @@ export default function App() {
                       const parsedDate = parseHolidayDateToISO(h.date);
                       handleLaunchDateChangeLocal(parsedDate);
                     }}
-                    className={`flex items-start text-left p-2 rounded-lg border transition ${
+                    className={`flex items-start text-left p-2 rounded-lg border transition cursor-pointer ${
                       (customHoliday === "" && selectedHoliday === h.name)
-                        ? "bg-indigo-50/60 border-indigo-200 text-indigo-900 font-medium"
-                        : "bg-white hover:bg-slate-50 border-slate-200/60 text-slate-700"
+                        ? "bg-indigo-50/60 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800 text-indigo-900 dark:text-indigo-200 font-medium"
+                        : "bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 border-slate-200/60 dark:border-slate-700 text-slate-700 dark:text-slate-300"
                     }`}
                   >
                     <span className="text-base mr-1.5">{h.emoji}</span>
                     <div className="flex-1 min-w-0">
-                      <div className="truncate font-semibold text-slate-800">{h.name}</div>
-                      <div className="text-[10px] text-slate-400 font-medium truncate">{h.date}</div>
+                      <div className="truncate font-semibold text-slate-800 dark:text-slate-200">{h.name}</div>
+                      <div className="text-[10px] text-slate-400 dark:text-slate-400 font-medium truncate">{h.date}</div>
                     </div>
                   </button>
                 ))}
                 {filteredHolidays.length === 0 && (
-                  <div className="col-span-2 text-center text-slate-400 py-4 font-medium">No holidays match your filter.</div>
+                  <div className="col-span-2 text-center text-slate-400 dark:text-slate-500 py-4 font-medium">No holidays match your filter.</div>
                 )}
               </div>
             </div>
           </div>
 
           {/* Section 2: Brand Context Config */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col gap-4">
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-xs font-bold">2</span>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm flex flex-col gap-4 transition-colors duration-200">
+            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-xs font-bold">2</span>
               Brand Core Blueprint
             </h2>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1">
-                <label className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+                <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
                   <Building className="w-3 h-3" /> Brand Name
                 </label>
                 <input 
@@ -604,13 +631,13 @@ export default function App() {
                   value={brandName}
                   onChange={(e) => setBrandName(e.target.value)}
                   placeholder="e.g. Brew & Bolt"
-                  className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   id="input_brand_name"
                 />
               </div>
               
               <div className="flex flex-col gap-1">
-                <label className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+                <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
                   <Briefcase className="w-3 h-3" /> Category/Product
                 </label>
                 <input 
@@ -618,7 +645,7 @@ export default function App() {
                   value={productType}
                   onChange={(e) => setProductType(e.target.value)}
                   placeholder="e.g. Coffee shop"
-                  className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   id="input_product_type"
                 />
               </div>
@@ -626,7 +653,7 @@ export default function App() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1">
-                <label className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+                <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
                   <Users className="w-3 h-3" /> Target Audience
                 </label>
                 <input 
@@ -634,13 +661,13 @@ export default function App() {
                   value={audience}
                   onChange={(e) => setAudience(e.target.value)}
                   placeholder="e.g. Remote workers"
-                  className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   id="input_audience"
                 />
               </div>
               
               <div className="flex flex-col gap-1">
-                <label className="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+                <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
                   <Volume2 className="w-3 h-3" /> Tone of Voice
                 </label>
                 <input 
@@ -648,20 +675,20 @@ export default function App() {
                   value={tone}
                   onChange={(e) => setTone(e.target.value)}
                   placeholder="e.g. Playful & Energetic"
-                  className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   id="input_tone"
                 />
               </div>
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-[11px] font-semibold text-slate-500">Custom Campaign Objectives / Offers</label>
+              <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Custom Campaign Objectives / Offers</label>
               <textarea 
                 value={customContext}
                 onChange={(e) => setCustomContext(e.target.value)}
                 placeholder="Include details about special discounts, features, specific taglines or content hooks you'd like the AI to weave in."
                 rows={3}
-                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
+                className="px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
                 id="input_custom_context"
               />
             </div>
@@ -692,6 +719,15 @@ export default function App() {
                   <span className="text-[11px] text-indigo-600 font-semibold animate-pulse">{loadingMessage}</span>
                 </div>
               )}
+
+              {error && (
+                <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 rounded-xl p-3 text-xs text-rose-600 dark:text-rose-400 font-medium mt-1 flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5 font-bold">
+                    <span className="text-sm">⚠️</span> Campaign Assembly Error
+                  </div>
+                  <p className="leading-relaxed">{error}</p>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -708,38 +744,38 @@ export default function App() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="bg-white border border-slate-200/80 rounded-2xl p-8 text-center flex-1 flex flex-col items-center justify-center min-h-[400px] shadow-sm"
+                className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-8 text-center flex-1 flex flex-col items-center justify-center min-h-[400px] shadow-sm transition-colors duration-200"
               >
                 <div className="relative mb-6">
                   <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full blur opacity-35 animate-pulse"></div>
-                  <div className="relative bg-white border border-slate-200 p-5 rounded-full text-indigo-600 shadow-md">
+                  <div className="relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-full text-indigo-600 dark:text-indigo-400 shadow-md">
                     <Sparkles className="w-10 h-10 animate-bounce" />
                   </div>
                 </div>
                 
-                <h3 className="text-xl font-extrabold text-slate-900 mb-2 tracking-tight">
+                <h3 className="text-xl font-extrabold text-slate-900 dark:text-slate-100 mb-2 tracking-tight">
                   Your Holiday Campaign Launchpad
                 </h3>
-                <p className="text-sm text-slate-500 max-w-md mb-8 leading-relaxed">
-                  Select a holiday, key in your brand specifics on the left, and click <strong className="text-slate-800">Assemble Campaign Assets</strong> to co-create a tailored multi-platform campaign blueprint, AI graphics prompts, countdown schedule, and launch checklists.
+                <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mb-8 leading-relaxed">
+                  Select a holiday, key in your brand specifics on the left, and click <strong className="text-slate-800 dark:text-slate-200">Assemble Campaign Assets</strong> to co-create a tailored multi-platform campaign blueprint, AI graphics prompts, countdown schedule, and launch checklists.
                 </p>
 
                 {/* Quick tutorial overview */}
                 <div className="w-full max-w-md grid grid-cols-3 gap-3 text-left">
-                  <div className="bg-slate-50 border border-slate-100 p-3 rounded-xl">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 p-3 rounded-xl">
                     <div className="text-lg mb-1">📅</div>
-                    <div className="text-xs font-bold text-slate-800 mb-0.5">1. Select Holiday</div>
-                    <div className="text-[10px] text-slate-400">Choose from major or fun micro-holidays.</div>
+                    <div className="text-xs font-bold text-slate-800 dark:text-slate-200 mb-0.5">1. Select Holiday</div>
+                    <div className="text-[10px] text-slate-400 dark:text-slate-400">Choose from major or fun micro-holidays.</div>
                   </div>
-                  <div className="bg-slate-50 border border-slate-100 p-3 rounded-xl">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 p-3 rounded-xl">
                     <div className="text-lg mb-1">🎯</div>
-                    <div className="text-xs font-bold text-slate-800 mb-0.5">2. Set Strategy</div>
-                    <div className="text-[10px] text-slate-400">Match campaign to your exact brand tone.</div>
+                    <div className="text-xs font-bold text-slate-800 dark:text-slate-200 mb-0.5">2. Set Strategy</div>
+                    <div className="text-[10px] text-slate-400 dark:text-slate-400">Match campaign to your exact brand tone.</div>
                   </div>
-                  <div className="bg-slate-50 border border-slate-100 p-3 rounded-xl">
+                  <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 p-3 rounded-xl">
                     <div className="text-lg mb-1">🚀</div>
-                    <div className="text-xs font-bold text-slate-800 mb-0.5">3. Co-Create</div>
-                    <div className="text-[10px] text-slate-400">Generate copy, graphics, and timeline schedules.</div>
+                    <div className="text-xs font-bold text-slate-800 dark:text-slate-200 mb-0.5">3. Co-Create</div>
+                    <div className="text-[10px] text-slate-400 dark:text-slate-400">Generate copy, graphics, and timeline schedules.</div>
                   </div>
                 </div>
               </motion.div>
@@ -785,13 +821,13 @@ export default function App() {
                 </div>
 
                 {/* Workspace Output Tabs Selector */}
-                <div className="bg-white border border-slate-200/80 rounded-xl p-1 shadow-sm flex">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl p-1 shadow-sm flex transition-colors duration-200">
                   <button
                     onClick={() => setActiveOutputTab('feed')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold tracking-tight transition ${
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold tracking-tight transition cursor-pointer ${
                       activeOutputTab === 'feed' 
                         ? "bg-indigo-600 text-white shadow-sm" 
-                        : "hover:bg-slate-50 text-slate-500 hover:text-slate-800"
+                        : "hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                     }`}
                   >
                     <LayoutGrid className="w-3.5 h-3.5" />
@@ -799,10 +835,10 @@ export default function App() {
                   </button>
                   <button
                     onClick={() => setActiveOutputTab('timeline')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold tracking-tight transition ${
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold tracking-tight transition cursor-pointer ${
                       activeOutputTab === 'timeline' 
                         ? "bg-indigo-600 text-white shadow-sm" 
-                        : "hover:bg-slate-50 text-slate-500 hover:text-slate-800"
+                        : "hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                     }`}
                   >
                     <Clock className="w-3.5 h-3.5" />
@@ -810,10 +846,10 @@ export default function App() {
                   </button>
                   <button
                     onClick={() => setActiveOutputTab('checklist')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold tracking-tight transition ${
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold tracking-tight transition cursor-pointer ${
                       activeOutputTab === 'checklist' 
                         ? "bg-indigo-600 text-white shadow-sm" 
-                        : "hover:bg-slate-50 text-slate-500 hover:text-slate-800"
+                        : "hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                     }`}
                   >
                     <ListTodo className="w-3.5 h-3.5" />
@@ -821,17 +857,16 @@ export default function App() {
                   </button>
                   <button
                     onClick={() => setActiveOutputTab('calendar')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold tracking-tight transition ${
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold tracking-tight transition cursor-pointer ${
                       activeOutputTab === 'calendar' 
                         ? "bg-indigo-600 text-white shadow-sm" 
-                        : "hover:bg-slate-50 text-slate-500 hover:text-slate-800"
+                        : "hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                     }`}
                   >
                     <Calendar className="w-3.5 h-3.5" />
                     Interactive Calendar
                   </button>
                 </div>
-
                 {/* Sub Tab Panel View Router */}
                 <div className="flex-1 flex flex-col min-h-[400px]">
                   
@@ -845,10 +880,10 @@ export default function App() {
                           <button
                             key={post.platform}
                             onClick={() => setActivePlatformTab(post.platform)}
-                            className={`px-4 py-2 rounded-xl text-xs font-bold border transition ${
+                            className={`px-4 py-2 rounded-xl text-xs font-bold border transition cursor-pointer ${
                               activePlatformTab === post.platform 
-                                ? "bg-white border-indigo-500 text-indigo-600 shadow-sm font-extrabold" 
-                                : "bg-slate-100/85 hover:bg-slate-100 border-transparent text-slate-500 hover:text-slate-800"
+                                ? "bg-white dark:bg-slate-900 border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-sm font-extrabold" 
+                                : "bg-slate-100/85 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                             }`}
                           >
                             {post.platform}
@@ -866,17 +901,17 @@ export default function App() {
                             
                             {/* INSTAGRAM SIMULATOR CARD */}
                             {post.platform === 'Instagram' && (
-                              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex-1 flex flex-col">
+                              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex-1 flex flex-col transition-colors duration-200">
                                 {/* Header */}
-                                <div className="p-3 border-b border-slate-100 flex items-center justify-between">
+                                <div className="p-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                                   <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-500 via-red-500 to-purple-600 p-[1.5px]">
-                                      <div className="w-full h-full rounded-full bg-white p-[1px] flex items-center justify-center font-bold text-[10px] text-slate-800">
+                                      <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 p-[1px] flex items-center justify-center font-bold text-[10px] text-slate-800 dark:text-slate-200">
                                         {brandName.substring(0, 2).toUpperCase()}
                                       </div>
                                     </div>
                                     <div>
-                                      <div className="text-xs font-bold text-slate-900">{brandName.toLowerCase().replace(/\s+/g, '')}</div>
+                                      <div className="text-xs font-bold text-slate-900 dark:text-slate-100">{brandName.toLowerCase().replace(/\s+/g, '')}</div>
                                       <div className="text-[9px] text-slate-400">Sponsored • Creative Draft</div>
                                     </div>
                                   </div>
@@ -884,7 +919,7 @@ export default function App() {
                                 </div>
                                 
                                 {/* Image Container */}
-                                <div className="bg-slate-50 aspect-square w-full relative flex items-center justify-center overflow-hidden border-b border-slate-100 min-h-[250px]">
+                                <div className="bg-slate-50 dark:bg-slate-950 aspect-square w-full relative flex items-center justify-center overflow-hidden border-b border-slate-100 dark:border-slate-800 min-h-[250px] transition-colors duration-200">
                                   {generatingImages[post.platform] ? (
                                     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-4 text-center">
                                       <RefreshCw className="w-8 h-8 animate-spin text-white mb-2" />
@@ -901,11 +936,11 @@ export default function App() {
                                     />
                                   ) : (
                                     <div className="p-6 text-center flex flex-col items-center justify-center gap-2">
-                                      <div className="bg-slate-100 p-4 rounded-full text-slate-400">
+                                      <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-full text-slate-400">
                                         <ImageIcon className="w-8 h-8" />
                                       </div>
-                                      <span className="text-xs font-bold text-slate-600">Visual Graphic Draft Empty</span>
-                                      <p className="text-[10px] text-slate-400 max-w-[180px]">Click generate visual tool on the right to auto-create with AI.</p>
+                                      <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Visual Graphic Draft Empty</span>
+                                      <p className="text-[10px] text-slate-400 dark:text-slate-500 max-w-[180px]">Click generate visual tool on the right to auto-create with AI.</p>
                                     </div>
                                   )}
                                 </div>
@@ -913,17 +948,17 @@ export default function App() {
                                 {/* Post Engagement Metrics Panel */}
                                 <div className="p-3.5 flex flex-col gap-2 flex-1 justify-between">
                                   <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3.5 text-slate-700">
+                                    <div className="flex items-center gap-3.5 text-slate-700 dark:text-slate-300">
                                       <Heart className="w-5 h-5 hover:text-red-500 cursor-pointer transition" />
-                                      <MessageSquare className="w-5 h-5 hover:text-slate-900 cursor-pointer transition" />
-                                      <Share2 className="w-5 h-5 hover:text-slate-900 cursor-pointer transition" />
+                                      <MessageSquare className="w-5 h-5 hover:text-slate-900 dark:hover:text-white cursor-pointer transition" />
+                                      <Share2 className="w-5 h-5 hover:text-slate-900 dark:hover:text-white cursor-pointer transition" />
                                     </div>
-                                    <Bookmark className="w-5 h-5 text-slate-700 hover:text-slate-900 cursor-pointer transition" />
+                                    <Bookmark className="w-5 h-5 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer transition" />
                                   </div>
 
-                                  <div className="text-[11px] font-bold text-slate-900 select-none">1,482 likes</div>
+                                  <div className="text-[11px] font-bold text-slate-900 dark:text-slate-100 select-none">1,482 likes</div>
 
-                                  <div className="text-xs leading-relaxed text-slate-800 flex-1 overflow-y-auto max-h-[140px] pr-1">
+                                  <div className="text-xs leading-relaxed text-slate-800 dark:text-slate-200 flex-1 overflow-y-auto max-h-[140px] pr-1">
                                     <span className="font-extrabold mr-1.5">{brandName.toLowerCase().replace(/\s+/g, '')}</span>
                                     {post.content}
                                   </div>
@@ -935,30 +970,30 @@ export default function App() {
 
                             {/* LINKEDIN SIMULATOR CARD */}
                             {post.platform === 'LinkedIn' && (
-                              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex-1 flex flex-col p-4">
+                              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex-1 flex flex-col p-4 transition-colors duration-200">
                                 <div className="flex items-center justify-between mb-3">
                                   <div className="flex items-center gap-2">
-                                    <div className="w-9 h-9 bg-slate-800 text-white rounded-lg flex items-center justify-center font-black text-xs">
+                                    <div className="w-9 h-9 bg-slate-800 dark:bg-slate-750 text-white rounded-lg flex items-center justify-center font-black text-xs">
                                       {brandName.substring(0,2).toUpperCase()}
                                     </div>
                                     <div>
-                                      <div className="text-xs font-bold text-slate-900 flex items-center gap-1">
+                                      <div className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1">
                                         {brandName}
                                         <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                                        <span className="text-[9px] text-indigo-600 font-bold hover:underline cursor-pointer">Follow</span>
+                                        <span className="text-[9px] text-indigo-600 dark:text-indigo-400 font-bold hover:underline cursor-pointer">Follow</span>
                                       </div>
                                       <div className="text-[9px] text-slate-400">{productType} • 1st • Just now</div>
                                     </div>
                                   </div>
-                                  <span className="text-slate-400 font-extrabold text-sm cursor-pointer hover:bg-slate-50 px-2 rounded">•••</span>
+                                  <span className="text-slate-400 font-extrabold text-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 px-2 rounded">•••</span>
                                 </div>
 
-                                <div className="text-xs leading-relaxed text-slate-800 mb-3 flex-1 overflow-y-auto max-h-[160px] pr-1 whitespace-pre-wrap">
+                                <div className="text-xs leading-relaxed text-slate-800 dark:text-slate-200 mb-3 flex-1 overflow-y-auto max-h-[160px] pr-1 whitespace-pre-wrap">
                                   {post.content}
                                 </div>
 
                                 {/* Graphic Frame */}
-                                <div className="bg-slate-100 rounded-xl relative overflow-hidden aspect-[1.91/1] w-full flex items-center justify-center border border-slate-200/50 min-h-[180px]">
+                                <div className="bg-slate-100 dark:bg-slate-950 rounded-xl relative overflow-hidden aspect-[1.91/1] w-full flex items-center justify-center border border-slate-200/50 dark:border-slate-800 min-h-[180px] transition-colors duration-200">
                                   {generatingImages[post.platform] && (
                                     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-4">
                                       <RefreshCw className="w-8 h-8 animate-spin text-white mb-2" />
@@ -983,7 +1018,7 @@ export default function App() {
                                 </div>
 
                                 {/* Reactions */}
-                                <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-slate-100 text-[10px] text-slate-500">
+                                <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-500">
                                   <span className="flex items-center -space-x-1">
                                     <span className="bg-blue-500 text-white rounded-full p-0.5 text-[8px]">👍</span>
                                     <span className="bg-red-500 text-white rounded-full p-0.5 text-[8px]">❤️</span>
@@ -996,14 +1031,14 @@ export default function App() {
 
                             {/* X (TWITTER) SIMULATOR CARD */}
                             {post.platform === 'X (Twitter)' && (
-                              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex-1 flex flex-col p-4 justify-between">
+                              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex-1 flex flex-col p-4 justify-between transition-colors duration-200">
                                 <div>
                                   <div className="flex items-center gap-2 mb-3">
-                                    <div className="w-9 h-9 bg-slate-900 text-white rounded-full flex items-center justify-center font-bold text-xs select-none">
+                                    <div className="w-9 h-9 bg-slate-900 dark:bg-slate-850 text-white rounded-full flex items-center justify-center font-bold text-xs select-none">
                                       {brandName.substring(0, 1).toUpperCase()}
                                     </div>
                                     <div>
-                                      <div className="text-xs font-bold text-slate-900 flex items-center gap-1">
+                                      <div className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1">
                                         {brandName}
                                         <span className="text-[10px] text-blue-500" title="Verified Brand">☑️</span>
                                       </div>
@@ -1011,13 +1046,13 @@ export default function App() {
                                     </div>
                                   </div>
 
-                                  <div className="text-xs leading-relaxed text-slate-900 mb-3 whitespace-pre-wrap overflow-y-auto max-h-[160px] pr-1">
+                                  <div className="text-xs leading-relaxed text-slate-900 dark:text-slate-100 mb-3 whitespace-pre-wrap overflow-y-auto max-h-[160px] pr-1">
                                     {post.content}
                                   </div>
                                 </div>
 
                                 {/* Graphic Frame */}
-                                <div className="bg-slate-100 rounded-2xl relative overflow-hidden aspect-[1.91/1] w-full flex items-center justify-center border border-slate-200/50 min-h-[180px]">
+                                <div className="bg-slate-100 dark:bg-slate-950 rounded-2xl relative overflow-hidden aspect-[1.91/1] w-full flex items-center justify-center border border-slate-200/50 dark:border-slate-800 min-h-[180px] transition-colors duration-200">
                                   {generatingImages[post.platform] && (
                                     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-4">
                                       <RefreshCw className="w-8 h-8 animate-spin text-white mb-2" />
@@ -1057,17 +1092,17 @@ export default function App() {
                           <div className="md:col-span-5 flex flex-col gap-4">
                             
                             {/* Copy Draft Text Tool */}
-                            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col gap-2.5">
+                            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm flex flex-col gap-2.5 transition-colors duration-200">
                               <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                                  <FileText className="w-3.5 h-3.5 text-indigo-600" /> Post Copywriter
+                                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                                  <FileText className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" /> Post Copywriter
                                 </span>
                                 <button
                                   onClick={() => copyToClipboard(post.content, post.platform)}
-                                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition ${
+                                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer ${
                                     copiedState[post.platform] 
                                       ? "bg-emerald-500 text-white" 
-                                      : "bg-slate-100 hover:bg-slate-200 text-slate-600"
+                                      : "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400"
                                   }`}
                                   id={`btn_copy_${post.platform}`}
                                 >
@@ -1087,7 +1122,7 @@ export default function App() {
                                 value={post.content}
                                 onChange={(e) => handleUpdatePostContent(post.platform, e.target.value)}
                                 rows={6}
-                                className="w-full text-xs font-medium border border-slate-200 rounded-lg p-2.5 bg-slate-50/50 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none leading-relaxed"
+                                className="w-full text-xs font-medium border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 bg-slate-50/50 dark:bg-slate-850/40 text-slate-800 dark:text-slate-105 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none leading-relaxed"
                               />
 
                               <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
@@ -1096,26 +1131,26 @@ export default function App() {
                               </div>
                             </div>
 
-                            {/* Visual Asset Generator Workshop */}
-                            <div className="bg-white border border-slate-200/90 rounded-xl p-4 shadow-sm flex flex-col gap-2.5">
-                              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                                <ImageIcon className="w-3.5 h-3.5 text-indigo-600" /> Graphics Generation Lab
+                             {/* Visual Asset Generator Workshop */}
+                            <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-xl p-4 shadow-sm flex flex-col gap-2.5 transition-colors duration-200">
+                              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                                <ImageIcon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" /> Graphics Generation Lab
                               </span>
 
                               <div className="flex flex-col gap-1">
-                                <label className="text-[10px] font-semibold text-slate-400">AI Prompt Workspace</label>
+                                <label className="text-[10px] font-semibold text-slate-400 dark:text-slate-550">AI Prompt Workspace</label>
                                 <textarea
                                   value={post.visualPrompt}
                                   onChange={(e) => handleUpdatePostPrompt(post.platform, e.target.value)}
                                   rows={4}
-                                  className="w-full text-[11px] font-mono border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none leading-normal"
+                                  className="w-full text-[11px] font-mono border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none leading-normal"
                                 />
                               </div>
 
                               <button
                                 onClick={() => handleGenerateImage(post.platform)}
                                 disabled={generatingImages[post.platform]}
-                                className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white font-bold text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer"
+                                className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-200 dark:hover:bg-slate-100 dark:text-slate-900 disabled:bg-slate-300 disabled:dark:bg-slate-850 text-white font-bold text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer"
                                 id={`btn_generate_image_${post.platform}`}
                               >
                                 {generatingImages[post.platform] ? (
@@ -1133,8 +1168,8 @@ export default function App() {
 
                               {/* Warning Display */}
                               {post.imageWarning && (
-                                <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-2 flex items-start gap-1.5 text-[9px] text-yellow-800 font-medium">
-                                  <AlertCircle className="w-3.5 h-3.5 text-yellow-600 shrink-0 mt-0.5" />
+                                <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-100 dark:border-yellow-900/30 rounded-lg p-2 flex items-start gap-1.5 text-[9px] text-yellow-800 dark:text-yellow-200 font-medium">
+                                  <AlertCircle className="w-3.5 h-3.5 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
                                   <div>
                                     <span className="font-bold">Notice:</span> {post.imageWarning}
                                   </div>
@@ -1150,39 +1185,39 @@ export default function App() {
 
                   {/* TAB 2: CAMPAIGN COUNTDOWN PLANNER */}
                   {activeOutputTab === 'timeline' && (
-                    <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col gap-4 flex-1">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col gap-4 flex-1 transition-colors duration-200">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-sm font-bold text-slate-900">Campaign Countdown Timeline</h3>
-                          <p className="text-xs text-slate-400 font-medium">Recommended release timeline for holiday momentum.</p>
+                          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Campaign Countdown Timeline</h3>
+                          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Recommended release timeline for holiday momentum.</p>
                         </div>
                       </div>
 
-                      <div className="relative border-l-2 border-indigo-100 pl-6 ml-3 flex flex-col gap-6 py-2">
+                      <div className="relative border-l-2 border-indigo-100 dark:border-indigo-950 pl-6 ml-3 flex flex-col gap-6 py-2">
                         {campaign.timeline.map((step, idx) => (
                           <div key={idx} className="relative">
                             
                             {/* Circle pointer */}
-                            <div className="absolute -left-[31px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 ring-4 ring-white">
+                            <div className="absolute -left-[31px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 ring-4 ring-white dark:ring-slate-900">
                               <div className="h-1.5 w-1.5 rounded-full bg-white"></div>
                             </div>
 
-                            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors duration-200">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <span className="bg-indigo-100 text-indigo-700 font-extrabold px-2 py-0.5 rounded text-[10px]">
+                                  <span className="bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-extrabold px-2 py-0.5 rounded text-[10px]">
                                     {step.timeframe}
                                   </span>
-                                  <h4 className="text-xs font-extrabold text-slate-800">{step.title}</h4>
+                                  <h4 className="text-xs font-extrabold text-slate-800 dark:text-slate-200">{step.title}</h4>
                                 </div>
-                                <p className="text-xs text-slate-600 font-medium mt-1.5">
-                                  <strong className="text-slate-900 font-semibold">Action:</strong> {step.task}
+                                <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-1.5">
+                                  <strong className="text-slate-900 dark:text-slate-100 font-semibold">Action:</strong> {step.task}
                                 </p>
                               </div>
 
-                              <div className="sm:text-right border-t sm:border-t-0 sm:border-l border-slate-200/60 pt-3 sm:pt-0 sm:pl-4 max-w-xs shrink-0">
+                              <div className="sm:text-right border-t sm:border-t-0 sm:border-l border-slate-200/60 dark:border-slate-800 pt-3 sm:pt-0 sm:pl-4 max-w-xs shrink-0">
                                 <span className="text-[9px] uppercase font-bold text-slate-400 block tracking-wider mb-0.5">Objective</span>
-                                <span className="text-[10px] font-bold text-slate-600 leading-normal">{step.objective}</span>
+                                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 leading-normal">{step.objective}</span>
                               </div>
                             </div>
 
@@ -1194,15 +1229,15 @@ export default function App() {
 
                   {/* TAB 3: OPERATIONAL TASK TRACKER */}
                   {activeOutputTab === 'checklist' && (
-                    <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col gap-4 flex-1">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col gap-4 flex-1 transition-colors duration-200">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-sm font-bold text-slate-900">Campaign Operational Checklist</h3>
-                          <p className="text-xs text-slate-400 font-medium">Keep your campaign organized by checking off progress.</p>
+                          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Campaign Operational Checklist</h3>
+                          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Keep your campaign organized by checking off progress.</p>
                         </div>
 
                         {/* Completion score */}
-                        <div className="bg-slate-100 text-slate-700 font-extrabold text-xs px-2.5 py-1 rounded-lg border border-slate-200/40">
+                        <div className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-extrabold text-xs px-2.5 py-1 rounded-lg border border-slate-200/40 dark:border-slate-700 transition-colors duration-200">
                           {campaign.checklist.filter(c => c.completed).length} / {campaign.checklist.length} Completed
                         </div>
                       </div>
@@ -1210,8 +1245,8 @@ export default function App() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Phases grouping */}
                         {Array.from(new Set(campaign.checklist.map(c => c.phase))).map(phase => (
-                          <div key={phase} className="bg-slate-50/50 border border-slate-200/40 rounded-xl p-4 flex flex-col gap-2">
-                            <span className="text-[10px] uppercase font-black text-indigo-600 tracking-wider border-b border-indigo-100/60 pb-1.5 mb-1 inline-block">
+                          <div key={phase} className="bg-slate-50/50 dark:bg-slate-800/20 border border-slate-200/40 dark:border-slate-800/80 rounded-xl p-4 flex flex-col gap-2 transition-colors duration-200">
+                            <span className="text-[10px] uppercase font-black text-indigo-600 dark:text-indigo-400 tracking-wider border-b border-indigo-100/60 dark:border-indigo-950 pb-1.5 mb-1 inline-block">
                               {phase} Phase
                             </span>
 
@@ -1219,17 +1254,17 @@ export default function App() {
                               {campaign.checklist.filter(c => c.phase === phase).map(item => (
                                 <label 
                                   key={item.id}
-                                  className={`flex items-start gap-2.5 p-2 bg-white border rounded-lg transition cursor-pointer select-none ${
+                                  className={`flex items-start gap-2.5 p-2 bg-white dark:bg-slate-900 border rounded-lg transition cursor-pointer select-none ${
                                     item.completed 
-                                      ? "border-emerald-200 bg-emerald-50/20 text-slate-500 line-through decoration-slate-300" 
-                                      : "border-slate-200/60 hover:border-slate-300 text-slate-800"
+                                      ? "border-emerald-250 bg-emerald-50/10 dark:bg-emerald-950/10 text-slate-450 dark:text-slate-500 line-through decoration-slate-300 dark:decoration-slate-700" 
+                                      : "border-slate-200/60 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-800 dark:text-slate-200"
                                   }`}
                                 >
                                   <input 
                                     type="checkbox"
                                     checked={item.completed}
                                     onChange={() => toggleChecklistItem(item.id)}
-                                    className="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 mt-0.5 cursor-pointer accent-indigo-600"
+                                    className="h-3.5 w-3.5 rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 mt-0.5 cursor-pointer accent-indigo-600"
                                   />
                                   <span className="text-[11px] font-semibold leading-relaxed">{item.title}</span>
                                 </label>
@@ -1347,44 +1382,44 @@ export default function App() {
                     };
 
                     return (
-                      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm flex flex-col gap-5 flex-1">
+                      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col gap-5 flex-1 transition-colors duration-200">
                         
                         {/* Calendar Controls & Picker Header */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
                           <div>
-                            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                              <Calendar className="w-4 h-4 text-indigo-600" /> Interactive Campaign Calendar
+                            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                              <Calendar className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /> Interactive Campaign Calendar
                             </h3>
-                            <p className="text-xs text-slate-400 font-medium">Drag and drop campaign tasks to reschedule them dynamically.</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Drag and drop campaign tasks to reschedule them dynamically.</p>
                           </div>
 
                           <div className="flex flex-wrap items-center gap-3">
                             {/* Campaign Peak / Launch Date setting */}
-                            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/60 px-3 py-1.5 rounded-xl text-xs">
-                              <span className="text-slate-500 font-semibold">🚀 Campaign Launch:</span>
+                            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 px-3 py-1.5 rounded-xl text-xs transition-colors duration-200">
+                              <span className="text-slate-500 dark:text-slate-400 font-semibold">🚀 Campaign Launch:</span>
                               <input 
                                 type="date"
                                 value={campaignLaunchDate}
                                 onChange={(e) => handleLaunchDateChangeLocal(e.target.value)}
-                                className="bg-transparent font-bold text-indigo-700 outline-none border-none cursor-pointer focus:ring-0"
+                                className="bg-transparent font-bold text-indigo-700 dark:text-indigo-400 outline-none border-none cursor-pointer focus:ring-0"
                               />
                             </div>
 
                             {/* Month Nav Buttons */}
-                            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+                            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl transition-colors duration-200">
                               <button 
                                 onClick={prevMonthNav}
-                                className="p-1.5 hover:bg-white rounded-lg text-slate-600 hover:text-indigo-600 transition shadow-xs"
+                                className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition shadow-xs cursor-pointer"
                                 title="Previous Month"
                               >
                                 <ChevronLeft className="w-4 h-4" />
                               </button>
-                              <span className="text-xs font-bold text-slate-800 px-2 min-w-[90px] text-center">
+                              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 px-2 min-w-[90px] text-center">
                                 {MONTH_NAMES[calendarMonth]} {calendarYear}
                               </span>
                               <button 
                                 onClick={nextMonthNav}
-                                className="p-1.5 hover:bg-white rounded-lg text-slate-600 hover:text-indigo-600 transition shadow-xs"
+                                className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition shadow-xs cursor-pointer"
                                 title="Next Month"
                               >
                                 <ChevronRight className="w-4 h-4" />
@@ -1396,7 +1431,7 @@ export default function App() {
                         {/* Calendar Month Grid */}
                         <div className="flex flex-col gap-1 flex-1">
                           {/* Week headers */}
-                          <div className="grid grid-cols-7 gap-2 text-center text-[10px] uppercase font-black text-slate-400 tracking-wider">
+                          <div className="grid grid-cols-7 gap-2 text-center text-[10px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-wider">
                             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
                               <div key={day} className="py-1">{day}</div>
                             ))}
@@ -1427,16 +1462,16 @@ export default function App() {
                                   onDrop={(e) => handleDropOnDay(e, cell.dateStr)}
                                   className={`min-h-[75px] p-1.5 border rounded-xl flex flex-col justify-between transition-all ${
                                     isCurrentMonth 
-                                      ? "bg-white border-slate-200/80" 
-                                      : "bg-slate-50/60 border-slate-100 text-slate-400"
+                                      ? "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800" 
+                                      : "bg-slate-50/60 dark:bg-slate-950/40 border-slate-100 dark:border-slate-900 text-slate-400 dark:text-slate-600"
                                   } ${
                                     isLaunchDay 
-                                      ? "ring-2 ring-indigo-500/80 ring-offset-1 bg-indigo-50/20" 
+                                      ? "ring-2 ring-indigo-500/80 ring-offset-1 dark:ring-offset-slate-900 bg-indigo-50/20 dark:bg-indigo-950/20" 
                                       : ""
                                   } ${
                                     isHovered 
-                                      ? "border-indigo-400 bg-indigo-50/30 shadow-md scale-[1.01]" 
-                                      : "hover:border-slate-300"
+                                      ? "border-indigo-400 dark:border-indigo-500 bg-indigo-50/30 dark:bg-indigo-950/30 shadow-md scale-[1.01]" 
+                                      : "hover:border-slate-300 dark:hover:border-slate-700"
                                   }`}
                                 >
                                   {/* Day Number and Badges */}
@@ -1444,13 +1479,13 @@ export default function App() {
                                     <span className={`text-[10px] font-black h-5 w-5 rounded-full flex items-center justify-center ${
                                       isLaunchDay 
                                         ? "bg-indigo-600 text-white shadow-xs" 
-                                        : isCurrentMonth ? "text-slate-700" : "text-slate-400"
+                                        : isCurrentMonth ? "text-slate-700 dark:text-slate-300" : "text-slate-400 dark:text-slate-600"
                                     }`}>
                                       {cell.dayNum}
                                     </span>
 
                                     {isLaunchDay && (
-                                      <span className="text-[8px] font-black uppercase text-indigo-700 tracking-wider bg-indigo-100 px-1 py-0.5 rounded leading-none shrink-0">
+                                      <span className="text-[8px] font-black uppercase text-indigo-700 dark:text-indigo-300 tracking-wider bg-indigo-100 dark:bg-indigo-950/60 px-1 py-0.5 rounded leading-none shrink-0">
                                         Launch
                                       </span>
                                     )}
@@ -1466,11 +1501,11 @@ export default function App() {
                                           e.dataTransfer.setData("checkpointIndex", task.index.toString());
                                           e.dataTransfer.effectAllowed = "move";
                                         }}
-                                        className="group cursor-grab active:cursor-grabbing bg-slate-900 text-white rounded-lg p-1.5 text-[9px] font-bold leading-snug flex flex-col gap-0.5 hover:bg-slate-800 transition relative overflow-hidden shadow-xs"
+                                        className="group cursor-grab active:cursor-grabbing bg-slate-900 dark:bg-slate-800 text-white rounded-lg p-1.5 text-[9px] font-bold leading-snug flex flex-col gap-0.5 hover:bg-slate-800 dark:hover:bg-slate-700 transition relative overflow-hidden shadow-xs border border-transparent dark:border-slate-700"
                                         title={`${task.timeframe} - ${task.task}`}
                                       >
                                         <div className="flex items-center justify-between">
-                                          <span className="text-[8px] bg-white/10 text-indigo-200 px-1 py-0.5 rounded uppercase leading-none font-extrabold tracking-wider shrink-0 max-w-[40px] truncate">
+                                          <span className="text-[8px] bg-white/10 dark:bg-white/5 text-indigo-200 dark:text-indigo-300 px-1 py-0.5 rounded uppercase leading-none font-extrabold tracking-wider shrink-0 max-w-[40px] truncate">
                                             {task.timeframe}
                                           </span>
                                         </div>
@@ -1487,10 +1522,10 @@ export default function App() {
                         </div>
 
                         {/* Calendar Bottom Legend / Quick Note */}
-                        <div className="bg-indigo-50/40 border border-indigo-100/40 rounded-xl p-3 text-[10px] text-slate-500 leading-relaxed flex items-start gap-2">
-                          <span className="text-indigo-600 text-xs">💡</span>
+                        <div className="bg-indigo-50/40 dark:bg-indigo-950/10 border border-indigo-100/40 dark:border-indigo-950/50 rounded-xl p-3 text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed flex items-start gap-2 transition-colors duration-200">
+                          <span className="text-indigo-600 dark:text-indigo-400 text-xs">💡</span>
                           <div>
-                            <span className="font-bold text-indigo-900">Pro-Tip:</span> Change the <span className="font-bold">Campaign Launch</span> date above to shift the entire timeline automatically relative to the new launch date, then fine-tune specific events by dragging-and-dropping them around.
+                            <span className="font-bold text-indigo-900 dark:text-indigo-300">Pro-Tip:</span> Change the <span className="font-bold">Campaign Launch</span> date above to shift the entire timeline automatically relative to the new launch date, then fine-tune specific events by dragging-and-dropping them around.
                           </div>
                         </div>
 
